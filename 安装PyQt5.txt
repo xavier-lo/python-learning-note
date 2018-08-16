@@ -1,0 +1,24 @@
+1.安装python3.5+ 官网下载 https://www.python.org/downloads/
+2.安装PyQt5 pip install PyQt5 -i https://pypi.douban.com/simple
+3.安装QT工具包 pip install PyQt5-tools -i http://pypi.douban.com/simple --trusted-host=pypi.douban.com
+4.测试是否安装成功用以下代码
+import sys
+from PyQt5 import QtWidgets,QtCore
+ 
+app = QtWidgets.QApplication(sys.argv)
+widget = QtWidgets.QWidget()
+widget.resize(360,360)
+widget.setWindowTitle("hello,pyqt5")
+widget.show()
+sys.exit(app.exec_())
+5.安装PyCharm 官网下载 https://www.jetbrains.com/pycharm/ 选择for free版本
+6.选择 File -> Settings   Project：** -> Project Interpreter  选择包含PyQt5的python环境 点击ok
+7.选择 File -> Settings   Tools -> External Tools 　点击+　输入　name:QTdesigner Program:**\Lib\site-packages\pyqt5-tools\designer.exe Working directory:$FileDir$ 点击ok
+8.选择 File -> Settings   Tools -> External Tools 　点击+　输入　name:PyUIC Program:**\python.exe Argument:-m PyQt5.uic.pyuic  $FileName$ -o $FileNameWithoutExtension$.py Working directory:$FileDir$ 点击ok
+
+9.GUI应用
+ 9.1 新建工程 点击工程名 右键->External Tools->QTdesigner 弹出qt设计窗口 设计好后保存至工程目录下**.ui文件
+ 9.2 点击工程名 右键->External Tools->PyUIC 在工程目录会出现相应**.py文件
+ 9.3 可在其他文件中import ** 使用了
+
+10.示例
