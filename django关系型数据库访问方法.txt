@@ -124,6 +124,10 @@ class Student(models.Model):
 		te = st[0].my_teachers.all()
 		st[0].my_teachers.remove(te[0])
 
+更新数据：
+	sc  = School.objects.filter(name="xueyuan").update(name="学院")
+
+
 删除实例对象：
 	st = Student.objects.all()
 	models.Model.delete(st[0])
