@@ -1,0 +1,262 @@
+﻿<!DOCTYPE HTML>
+<!-- saved from url=(0044)https://www.cnblogs.com/kenD/p/10079700.html -->
+<!DOCTYPE html PUBLIC "" ""><HTML lang="zh-cn"><HEAD><META content="IE=10.0000" 
+http-equiv="X-UA-Compatible">
+     
+<META charset="utf-8">     
+<META name="viewport" content="width=device-width, initial-scale=1">     
+<META name="referrer" content="origin">     
+<META http-equiv="Cache-Control" content="no-transform">     
+<META http-equiv="Cache-Control" content="no-siteapp">     <TITLE>django 
+ORM中的RelatedManager(关联管理器) - ken_131 - 博客园</TITLE>     
+<META content="关联管理器应用在 一对多的表 或者 多对多的表 多对多表中的用法: 在多对多的表中 正向查询 在反向查询中会有用到关联管理器 多对一表中的用法:" 
+property="og:description">     <LINK href="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/blog-common.css" 
+rel="stylesheet" type="text/css"> <LINK id="MainCss" href="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/bundle-sea.css" 
+rel="stylesheet" type="text/css"> <LINK id="mobile-style" href="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/bundle-sea-mobile.css" 
+rel="stylesheet" type="text/css" media="only screen and (max-width: 767px)">     
+<LINK title="RSS" href="https://www.cnblogs.com/kenD/rss" rel="alternate" type="application/rss+xml"> 
+    <LINK title="RSD" href="https://www.cnblogs.com/kenD/rsd.xml" rel="EditURI" 
+type="application/rsd+xml"> <LINK href="https://www.cnblogs.com/kenD/wlwmanifest.xml" 
+rel="wlwmanifest" type="application/wlwmanifest+xml">     
+<SCRIPT src="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/jquery-2.2.0.min.js"></SCRIPT>
+     
+<SCRIPT>var currentBlogId=447360;var currentBlogApp='kenD',cb_enable_mathjax=false;var isLogined=false;</SCRIPT>
+     
+<SCRIPT src="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/blog-common.js" type="text/javascript"></SCRIPT>
+ 
+<META name="GENERATOR" content="MSHTML 11.00.10570.1001"></HEAD> 
+<BODY><A name="top"></A> <!--done--> 
+<DIV id="header"><!--done--> 
+<DIV class="header">
+<DIV class="headerText"><A class="headermaintitle" id="Header1_HeaderTitle" 
+href="https://www.cnblogs.com/kenD/">ken_D</A><BR></DIV></DIV></DIV>
+<DIV id="mytopmenu">
+<DIV id="mylinks"><A class="menu" id="blog_nav_sitehome" href="https://www.cnblogs.com/">博客园</A> 
+&nbsp;<A class="menu" id="blog_nav_myhome" 
+href="https://www.cnblogs.com/kenD/">首页</A> &nbsp;<A class="menu" id="blog_nav_newpost" 
+href="https://i.cnblogs.com/EditPosts.aspx?opt=1" rel="nofollow">新随笔</A> &nbsp;
+<A class="menu" id="blog_nav_contact" href="https://msg.cnblogs.com/send/ken_131" 
+rel="nofollow">联系</A> &nbsp;<A class="menu" id="blog_nav_rss" href="https://www.cnblogs.com/kenD/rss">订阅</A><A 
+id="blog_nav_rss_image" href="https://www.cnblogs.com/kenD/rss"><IMG alt="订阅" 
+src="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/xml.gif"></A>&nbsp;
+<A class="menu" id="blog_nav_admin" href="https://i.cnblogs.com/" 
+rel="nofollow">管理</A> </DIV>
+<DIV id="mystats">
+<DIV id="blog_stats">随笔-123&nbsp; 评论-1&nbsp; 文章-0&nbsp; <!--trackbacks-0--> 
+</DIV></DIV></DIV>
+<DIV id="centercontent">
+<DIV id="post_detail">
+<DIV class="post">
+<H1 class="postTitle"><A class="postTitle2" id="cb_post_title_url" href="https://www.cnblogs.com/kenD/p/10079700.html">django 
+ORM中的RelatedManager(关联管理器)</A></H1>
+<DIV class="blogpost-body" id="cnblogs_post_body">
+<P>关联管理器应用在 一对多的表 或者 多对多的表</P>
+<P><SPAN style="color: rgb(255, 0, 0);"><STRONG>多对多表中的用法:</STRONG></SPAN></P>
+<P>在多对多的表中 正向查询&nbsp;</P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">基于对象的查询</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);">正查</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=1)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj)  #&lt;Author object: 1 吴晓波&gt;</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())   #出版过的所有的书    &lt;QuerySet [&lt;Book: 小王子&gt;, &lt;Book: 哈利波特&gt;]&gt;</SPAN></PRE></DIV>
+<P>在反向查询中会有用到关联管理器</P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">反向</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> book_obj = Book.objects.get(id=1)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(book_obj)   #小王子</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">联合出版小王子这本书的所有作者</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(book_obj.author.all())</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);">&lt;QuerySet [&lt;Author: &lt;Author object: 1 吴晓波&gt;&gt;, &lt;Author: &lt;Author object: 3 俞敏洪&gt;&gt;]&gt;</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);"># </SPAN><SPAN style="color: rgb(0, 128, 0);"><SPAN style="color: rgb(255, 0, 0);">设置多对多关系</SPAN></SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=1)   ##&lt;Author object: 1 吴晓波&gt;</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj.book_set.set([4,5])  # 要关联对象的ID  [ 对象的id，对象的id]</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 把书籍id=4 和 书籍id=5 的跟author id=1的绑定在一起,  author id=1之前绑定的给清除了</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(255, 0, 0);"> author_obj.book_set.set(Book.objects.all())</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())  #把所有的书籍都跟author id=1的给绑定</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);"># </SPAN><SPAN style="color: rgb(255, 0, 0);">添加多对多的关系</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=2)  #author id = 2的</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj.book_set.add(3)  # 要关联对象的ID   直接通过id找对象就类似于学生的学号,但是不确定这个学生到底在不在</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);">  类似于反向查询  在book表中找到 book id=3 的跟author id=2 的绑定</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=2)  #author id = 2的</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(255, 0, 0);"> author_obj.book_set.add(Book.objects.get(id=2))  # 要关联对象</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> #这种方法就类似于直接找到学生 再把学生叫过来 然后绑定关系</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())</SPAN>
+
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> <SPAN style="color: rgb(255, 0, 0);">删除多对多关系</SPAN></SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=1)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj.book_set.remove(1)  # 要关联对象的id</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> #  找到book表中id=1 的 删除和author id=1 之间的关系</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=1)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"><SPAN style="color: rgb(255, 0, 0);"> author_obj.book_set.remove(Book.objects.get(id=2))</SPAN>  # 要关联对象</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> #  把book表中的对象找出来  然后处理和author的关系</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"><SPAN style="color: rgb(255, 0, 0);"> 清空当前对象的多对多的关系</SPAN></SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> author_obj = Author.objects.get(id=1)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"><SPAN style="color: rgb(255, 0, 0);"> author_obj.book_set.clear()</SPAN>  #解除所有的绑定关系</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(author_obj.book_set.all())</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"><SPAN style="color: rgb(255, 0, 0);">创建一条多对多的关系 create()</SPAN></SPAN>
+author_obj = Author.objects.get(id=1<SPAN style="color: rgb(0, 0, 0);">)
+author_obj.book_set.create(title</SPAN>=<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">太亮教抛光</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>,price=50<SPAN style="color: rgb(0, 0, 0);">)
+</SPAN><SPAN style="color: rgb(0, 0, 255);">print</SPAN>(author_obj.book_set.all())</PRE></DIV>
+<P>多对一表中的用法:</P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">基于对象的查询   正向查询</SPAN>
+book_obj = models.Book.objects.get(id=1)  <SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">拿到第一个book对象</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(book_obj)   #                                      &lt;Book object: 1 小王子&gt;</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(book_obj.title)  #                                 小王子</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(book_obj.publisher)    #正查按字段  书的出版社     沙河出版社</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(book_obj.publisher_id) #这本书对应的出版社的id     1</SPAN></PRE></DIV>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">  反向查询</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> pub_obj = models.Publisher.objects.get(id=3)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(pub_obj.name) #人民出版社</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 反向查询    查询出版社出的所有书籍</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> ret = pub_obj.book_set.all()</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(ret)</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> &lt;QuerySet [&lt;Book: 解忧杂货普&gt;, &lt;Book: 精进&gt;]&gt;</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> ret = pub_obj.books.all()   # related_name='books' 反向查询时使用 不用再用表名小写_set了</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(ret)  #&lt;QuerySet [&lt;Book: 解忧杂货普&gt;, &lt;Book: 精进&gt;]&gt;</SPAN>
+
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 基于字段的查询</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 查沙河出版社出版的书</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> ret = models.Book.objects.filter(publisher__name="沙河出版社")</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(ret)</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> ret = Book.objects.filter(publisher__name="沙河出版社")</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">找 精进这本书 的出版社是哪个  反查    指定了related_name='books'</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> ret = Publisher.objects.filter(books__title="精进")</SPAN>
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">不指定related_name</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> ret = Publisher.objects.filter(book__title="精进")</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> print(ret)</SPAN>
+
+
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">  Django ORM 之 关联管理器(RelatedManager)   *********</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> “关联管理器”是在一对多或者多对多的关联上下文中使用的管理器</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 对于ForeignKey对象，这个方法仅在null=True时存在</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 外键字段可以为null 才有remove和clear  只能写对象</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 外键 在Book 表中</SPAN><SPAN style="color: rgb(0, 128, 0);">
+#</SPAN><SPAN style="color: rgb(0, 128, 0);"> id为1的出版社  出版过的书籍</SPAN>
+pub_obj = Publisher.objects.get(id=1<SPAN style="color: rgb(0, 0, 0);">)
+</SPAN><SPAN style="color: rgb(0, 0, 255);">print</SPAN>(pub_obj.book_set.all())  <SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);">&lt;QuerySet [&lt;Book: 小王子&gt;, &lt;Book: 三国&gt;]&gt;</SPAN>
+
+<SPAN style="color: rgb(0, 128, 0);">#</SPAN><SPAN style="color: rgb(0, 128, 0);"> 从关联对象集中移除执行的模型对象        remove(一个对象)</SPAN>
+ret = pub_obj.book_set.remove(Book.objects.get(id=1<SPAN style="color: rgb(0, 0, 0);">))
+</SPAN><SPAN style="color: rgb(0, 0, 255);">print</SPAN><SPAN style="color: rgb(0, 0, 0);">(ret)
+
+pub_obj.books.clear()
+
+pub_obj.books.create(title</SPAN>=<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">太亮的产后护理</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>)</PRE></DIV>
+<P>&nbsp;</P></DIV>
+<DIV id="MySignature"></DIV>
+<DIV class="clear"></DIV>
+<DIV id="blog_post_info_block">
+<DIV id="BlogPostCategory"></DIV>
+<DIV id="EntryTag"></DIV>
+<DIV id="blog_post_info"></DIV>
+<DIV class="clear"></DIV>
+<DIV id="post_next_prev"></DIV></DIV>
+<DIV class="postDesc">posted on <SPAN id="post-date">2018-12-06 21:31</SPAN> <A 
+href="https://www.cnblogs.com/kenD/">ken_131</A> 阅读(<SPAN 
+id="post_view_count">...</SPAN>) 评论(<SPAN id="post_comment_count">...</SPAN>)  
+<A href="https://i.cnblogs.com/EditPosts.aspx?postid=10079700" 
+rel="nofollow">编辑</A> <A onclick="AddToWz(10079700);return false;" href="https://www.cnblogs.com/kenD/p/10079700.html#">收藏</A></DIV></DIV>
+<SCRIPT type="text/javascript">var allowComments=true,cb_blogId=447360,cb_entryId=10079700,cb_blogApp=currentBlogApp,cb_blogUserGuid='3d5366af-a2b3-4524-38cc-08d5f07434ca',cb_entryCreatedDate='2018/12/6 21:31:00';loadViewCount(cb_entryId);var cb_postType=1;var isMarkdown=false;</SCRIPT>
+ </DIV><A name="!comments"></A>
+<DIV id="blog-comments-placeholder"></DIV>
+<SCRIPT type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</SCRIPT>
+ 
+<DIV class="commentform" id="comment_form"><A name="commentform"></A> 
+<DIV id="divCommentShow"></DIV>
+<DIV id="comment_nav"><SPAN id="span_refresh_tips"></SPAN><A id="lnk_RefreshComments" 
+onclick="return RefreshCommentList();" href="javascript:void(0);" clientidmode="Static" 
+runat="server">刷新评论</A><A onclick="return RefreshPage();" href="https://www.cnblogs.com/kenD/p/10079700.html#">刷新页面</A><A 
+href="https://www.cnblogs.com/kenD/p/10079700.html#top">返回顶部</A></DIV>
+<DIV id="comment_form_container"></DIV>
+<DIV class="ad_text_commentbox" id="ad_text_under_commentbox"></DIV>
+<DIV id="ad_t2"></DIV>
+<DIV id="opt_under_post"></DIV>
+<SCRIPT src="django%20ORM中的RelatedManager(关联管理器)%20-%20ken_131%20-%20博客园_files/gpt.js" async="async"></SCRIPT>
+ 
+<SCRIPT>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+</SCRIPT>
+ 
+<SCRIPT>
+  googletag.cmd.push(function() {
+        googletag.defineSlot('/1090369/C1', [300, 250], 'div-gpt-ad-1546353474406-0').addService(googletag.pubads());
+        googletag.defineSlot('/1090369/C2', [468, 60], 'div-gpt-ad-1539008685004-0').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+  });
+</SCRIPT>
+ 
+<DIV class="c_ad_block" id="cnblogs_c1">
+<DIV id="div-gpt-ad-1546353474406-0" 
+style="width: 300px; height: 250px;"></DIV></DIV>
+<DIV id="under_post_news"></DIV>
+<DIV class="c_ad_block" id="cnblogs_c2">
+<DIV id="div-gpt-ad-1539008685004-0" 
+style="width: 468px; height: 60px;"></DIV></DIV>
+<DIV id="under_post_kb"></DIV>
+<DIV class="c_ad_block" id="HistoryToday"></DIV>
+<SCRIPT type="text/javascript">
+ if(enablePostBottom()) {
+    codeHighlight();
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverT2();
+    deliverC1();
+    deliverC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);  
+}
+</SCRIPT>
+ </DIV></DIV>
+<DIV id="leftcontent">
+<DIV id="leftcontentcontainer"><!--done--> 
+<DIV class="newsItem">
+<DIV id="blog-news"></DIV>
+<SCRIPT type="text/javascript">loadBlogNews();</SCRIPT>
+ </DIV>
+<DIV id="blog-calendar" style="display: none;"></DIV>
+<SCRIPT type="text/javascript">loadBlogDefaultCalendar();</SCRIPT>
+<BR>
+<DIV id="blog-sidecolumn"></DIV>
+<SCRIPT type="text/javascript">loadBlogSideColumn();</SCRIPT>
+</DIV></DIV><!--done--> 
+<DIV class="footer">	Powered by: <A 
+href="http://www.cnblogs.com/">博客园</A>	模板提供：<A 
+href="http://blog.hjenglish.com/">沪江博客</A>	 Copyright ©2019 ken_131 
+</DIV></BODY></HTML>

@@ -1,0 +1,168 @@
+#此笔记适用python3.6 django1.8
+
+实例：
+
+#定义学校
+class School(models.Model):
+	#定义名称
+	name = models.CharField(max_length = 20)
+	#定义地址
+	addr = models.CharField(max_length = 50)
+	#定义魔法函数
+	def __str__(self):
+		return self.name
+
+#定义管理者
+class Manager(models.Model):
+	#定义姓名
+	name = models.CharField(max_length = 10)
+	#定义地址
+	addr = models.CharField(max_length = 50)
+	#定义关系 与学校一对一关系
+	my_school = models.OneToOneField("School")
+	#定义魔法函数
+	def __str__(self):
+		return self.name
+
+#定义老师
+class Teacher(models.Model):
+	#定义姓名
+	name = models.CharField(max_length = 10)
+	#定义地址
+	addr = models.CharField(max_length = 50)
+	#定义关系 与学校一对多关系
+	my_school = models.ForeignKey("School")
+	#定义魔法函数
+	def __str__(self):
+		return self.name
+
+#定义学生
+class Student(models.Model):
+	#定义姓名
+	name = models.CharField(max_length = 10)
+	#定义地址
+	addr = models.CharField(max_length = 50)
+	#定义关系 与学校一对多关系
+	my_school = models.ForeignKey("School")
+	#定义关系 与老师多对多关系
+	my_teachers = models.ManyToManyField("Teacher")
+	#定义魔法函数
+	def __str__(self):
+		return self.name
+
+
+一对一关系:
+	添加（没有定义一侧）：
+		sc = School()
+		sc.name = "xuexiao"
+		sc.addr = "shanghai"
+		sc.save()
+	添加（有定义一侧）：
+		1: ma = Manager()
+		   ma.name = "johne"
+		   ma.addr = "shanghai"
+		   ma.save()
+		2: Manager.objects.create(name = "johne",addr = "shanghai")
+	查询（没有定义一侧）：
+		sc = School.objects.all()
+		sc[0].name
+		sc[0].addr
+		1 查学校的管理者:
+		   	sc[0].manager
+		2 通过管理者查学校：
+			sc = School.objects.get(manager__name="johne")
+	查询（有定义一侧）：
+		ma = Manager.objects.all
+		ma[0].name
+		ma[0].addr
+		ma[0].my_school
+
+一对多关系：
+	添加（没有定义一侧）：
+		添加自身实例与一对一关系添加相同
+		添加关系老师：
+			sc = School.objects.all()
+			te = Teacher.objects.all()
+			sc[0].teacher_set.add(te[0])
+			sc[0].teacher_set.add(te[1])
+	添加（有定义一侧）：
+		与一对一关系添加相同
+	查询（没有定义一侧）：
+		sc = School.objects.all()
+		查学校所有老师：
+			sc[0].teacher_set.all()
+	查询（有定义一侧）：
+		与一对一关系查询相同
+
+多对多关系：
+	添加（没有定义一侧）：
+		添加自身实例与一对一关系相同
+		添加关系学生：
+			te = Teacher.objects.all()
+			st = Student.objects.all()
+			te[0].student_set.add(st[0])
+			te[0].student_set.add(st[1])
+	添加（有定义一侧）：
+		Student.objects.create(name="zhangsan",addr="shanghai",my_school=sc[0])
+		添加关系老师：
+			te = Teacher.objects.all()
+			st = Student.objects.all()
+			st[0].my_teachers.add(te[0])
+			st[0].my_teachers.add(te[1])
+	查询（没有定义一侧）：
+		te = Teacher.objects.all()
+		te[0].student_set.all()
+	查询（有定义一侧）：
+		st = Student.objects.all()
+		st[0].my_teachers.all()
+	删除关系（没有定义一侧）：
+		te = Teacher.objects.all()
+		st = te[0].student_set.all()
+		te[0].student_set.remove(st[0])
+	删除关系（有定义一侧）：
+		st = Student.objects.all()
+		te = st[0].my_teachers.all()
+		st[0].my_teachers.remove(te[0])
+
+删除实例对象：
+	st = Student.objects.all()
+	models.Model.delete(st[0])
+
+
+常见查找方法:
+	1.通用查找格式: 属性名 _ _ (用下面的内容) =值
+	gt : 大于
+	gte : 大于等于
+	lt : 小于
+	lte : 小于等于
+	range: 范围
+	year : 年份
+	isnull : 是否为空
+
+	2.查找等于指定值的格式: 属性名 = 值
+
+	3.模糊查找: 属性名 _ _ (使用下面的内容) = 值
+	exact : 精确等于
+	iexact: 不区分大小写
+	contains: 包含
+	startswith: 以..开头
+	endswith: 以…结尾 
+
+	例子：
+		#查找名字等于zhangsan的学生
+		st = Student.objects.filter(name = "zhangsan")
+		st = Student.objects.get(name = "zhangsan")
+		#查找名字中包含san的学生
+	      	st = Student.objects.filter(name__contains = "san")
+	      	st = Student.objects.get(name__contains = "san")
+		#查找名字以sh开头的学生
+	      	st = Student.objects.filter(addr__startswith = "sh")
+	      	st = Student.objects.get(addr__startswith = "sh")
+		#查找id大于10的学生
+	      	st = Student.objects.filter(id__gt = 10)
+	      	st = Student.objects.get(id__gt = 10)
+
+
+		
+	
+	
