@@ -1,0 +1,8 @@
+错误信息1： "detail": "JSON parse error - Expecting property name enclosed in double quotes: line 4 column 1 (char 42)"
+原因：JSON数据最后括号前多了一个字符，通常为,
+
+错误信息2：RuntimeError：You called this URL via PUT,but the URL doesn't end in a slash and you have APPEND_SLASH set.Django can't redirect to the slash URL while maintaining PUT data
+原因：PUT/POST请求的URL最后少了一个/
+
+错误信息3：** is not a valid regular expression:redefinition of group name 'format'**
+原因：使用内置routers时使用了format_suffix_patterns造成的

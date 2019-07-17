@@ -1,0 +1,620 @@
+﻿<!DOCTYPE HTML>
+<!-- saved from url=(0046)https://www.cnblogs.com/pyspark/p/8607801.html -->
+<!DOCTYPE html PUBLIC "" ""><HTML lang="zh-cn"><HEAD><META content="IE=10.0000" 
+http-equiv="X-UA-Compatible">
+     
+<META charset="utf-8">     
+<META name="viewport" content="width=device-width, initial-scale=1">     
+<META name="referrer" content="origin">     
+<META http-equiv="Cache-Control" content="no-transform">     
+<META http-equiv="Cache-Control" content="no-siteapp">     <TITLE>Django rest 
+framework之序列化小结 - 哀乐之巅写年华 - 博客园</TITLE>     
+<META content="最近在DRF的序列化上踩过了不少坑，特此结合官方文档记录下，方便日后查阅。 【01】前言 serializers是什么？官网是这样的”Serializers allow complex data su" 
+property="og:description">     <LINK href="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/blog-common.css" 
+rel="stylesheet" type="text/css"> <LINK id="MainCss" href="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/bundle-facebook.css" 
+rel="stylesheet" type="text/css"> <LINK id="mobile-style" href="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/bundle-facebook-mobile.css" 
+rel="stylesheet" type="text/css" media="only screen and (max-width: 767px)">     
+<LINK title="RSS" href="https://www.cnblogs.com/pyspark/rss" rel="alternate" 
+type="application/rss+xml">     <LINK title="RSD" href="https://www.cnblogs.com/pyspark/rsd.xml" 
+rel="EditURI" type="application/rsd+xml"> <LINK href="https://www.cnblogs.com/pyspark/wlwmanifest.xml" 
+rel="wlwmanifest" type="application/wlwmanifest+xml">     
+<SCRIPT src="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/jquery-2.2.0.min.js"></SCRIPT>
+     
+<SCRIPT>var currentBlogId=374333;var currentBlogApp='pyspark',cb_enable_mathjax=false;var isLogined=false;</SCRIPT>
+     
+<SCRIPT src="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/blog-common.js" type="text/javascript"></SCRIPT>
+ 
+<META name="GENERATOR" content="MSHTML 11.00.10570.1001"></HEAD> 
+<BODY><A name="top"></A> 
+<DIV id="home">
+<DIV id="header">
+<DIV id="blogTitle"><!--done--> 
+<H1><A class="headermaintitle" id="Header2_HeaderTitle" href="https://www.cnblogs.com/pyspark/">不为乌合不从众</A></H1>
+<H2></H2></DIV><!--end: blogTitle 博客的标题和副标题 -->	 
+<DIV id="navigator"><!--done-->			 
+<UL id="navList">
+  <LI><A class="menu" id="blog_nav_sitehome" 
+  href="https://www.cnblogs.com/">博客园</A></LI>
+  <LI><A class="menu" id="blog_nav_myhome" href="https://www.cnblogs.com/pyspark/">首页</A></LI>
+  <LI><A class="menu" id="blog_nav_newpost" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" 
+  rel="nofollow">新随笔</A></LI>
+  <LI><A class="menu" id="blog_nav_contact" accesskey="9" href="https://msg.cnblogs.com/send/%E5%93%80%E4%B9%90%E4%B9%8B%E5%B7%85%E5%86%99%E5%B9%B4%E5%8D%8E" 
+  rel="nofollow">联系</A></LI>
+  <LI><A class="menu" id="blog_nav_admin" href="https://i.cnblogs.com/" rel="nofollow">管理</A></LI>
+  <LI><A class="menu" id="blog_nav_rss" href="https://www.cnblogs.com/pyspark/rss">订阅</A>
+  				 <A class="aHeaderXML" id="blog_nav_rss_image" href="https://www.cnblogs.com/pyspark/rss"><IMG 
+  alt="订阅" src="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/xml.gif"></A></LI></UL>
+<DIV class="blogStats">
+<DIV id="blog_stats"><!--done--> 随笔- 29&nbsp; 文章- 173&nbsp; 评论- 8&nbsp; 
+</DIV></DIV><!--end: blogStats -->	 </DIV><!--end: navigator 博客导航栏 --> </DIV><!--end: header 头部 --> 
+<DIV id="main">
+<DIV id="mainContent">
+<DIV class="forFlow">
+<DIV id="post_detail"><!--done--> 
+<DIV id="topics">
+<DIV class="post">
+<H1 class="postTitle"><A class="postTitle2" id="cb_post_title_url" href="https://www.cnblogs.com/pyspark/p/8607801.html">Django 
+rest framework之序列化小结</A>		 </H1>
+<DIV class="clear"></DIV>
+<DIV class="postBody">
+<DIV class="blogpost-body" id="cnblogs_post_body">
+<P><SPAN style="font-size: 18px;">　　&nbsp; 
+&nbsp;最近在DRF的序列化上踩过了不少坑，特此结合官方文档记录下，方便日后查阅。</SPAN></P>
+<P><SPAN style="font-size: 18px;">【01】前言</SPAN></P>
+<P><SPAN style="font-size: 18px;">　　&nbsp; 
+&nbsp;serializers是什么？官网是这样的”Serializers allow complex data such as querysets and 
+model instances to be converted to native Python datatypes that can then be 
+easily rendered into JSON, XML or other content types. 
+“翻译出来就是，将复杂的数据结构，例如ORM中的QuerySet或者Model实例对象转换成Python内置的数据类型，从而进一步方便数据和json，xml等格式的数据进行交互。</SPAN></P>
+<P><SPAN style="font-size: 18px;">　　　根据实际的工作经验，我来总结下serializers的作用：</SPAN><SPAN 
+style="font-size: 18px;">　</SPAN></P>
+<P><SPAN 
+style="color: rgb(255, 0, 0); font-size: 18px;">　　1.将queryset与model实例等进行序列化，转化成json格式，返回给用户(api接口)。</SPAN><BR><SPAN 
+style="color: rgb(255, 0, 0); font-size: 18px;">　　2.将post与patch/put的上来的数据进行验证。</SPAN><BR><SPAN 
+style="color: rgb(255, 0, 0); font-size: 18px;">　　3.对post与patch/put数据进行处理。(后面的内容，将用patch表示put/patch更新，博主认为patch更贴近更新的说法)</SPAN><BR><SPAN 
+style="color: rgb(255, 0, 0); font-size: 18px;">　简单来说，针对get来说，serializers的作用体现在第一条，但如果是其他请求，serializers能够发挥2,3条的作用！</SPAN></P>
+<P><SPAN style="font-size: 18px;">用一张图来说明下它的作用：</SPAN></P>
+<P><SPAN style="font-size: 18px;"><IMG alt="" src="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/1220824-20180325105756993-554541247.png"></SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">serializers.fieild：我们知道在django中，form也有许多field，那serializers其实也是drf中发挥着这样的功能。我们先简单了解常用的几个field。</SPAN></P>
+<H4 id="1-常用的field"><SPAN style="font-size: 18px;">1. 常用的field</SPAN></H4>
+<P><SPAN 
+style="font-size: 18px;">　　CharField、BooleanField、IntegerField、DateTimeField这几个用得比较多，我们把外键的field放到后面去说！</SPAN></P>
+<P><SPAN style="font-size: 18px;">参考如下的例子：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># 举例子
+mobile </SPAN>= serializers.CharField(max_length=<SPAN style="color: rgb(128, 0, 128);">11</SPAN>, min_length=<SPAN style="color: rgb(128, 0, 128);">11</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+age </SPAN>= serializers.IntegerField(min_value=<SPAN style="color: rgb(128, 0, 128);">1</SPAN>, max_value=<SPAN style="color: rgb(128, 0, 128);">100</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+# <SPAN style="color: rgb(255, 0, 0);">format可以设置时间的格式，下面例子会输出如:</SPAN></SPAN><SPAN style="color: rgb(255, 0, 0);">2018-3-20 12:10</SPAN><SPAN style="color: rgb(0, 0, 0);">
+pay_time </SPAN>= <SPAN style="color: rgb(255, 0, 0);">serializers.DateTimeField(read_only=True,format='%Y-%m-%d %H:%M'</SPAN><SPAN style="color: rgb(0, 0, 0);"><SPAN style="color: rgb(255, 0, 0);">)</SPAN>
+is_hot </SPAN>= serializers.BooleanField()  # 例如设置商品是否热销</SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">2. Core arguments参数</SPAN><BR><SPAN style="font-size: 18px;">read_only：True表示不允许用户自己上传，只能用于api的输出。如果某个字段设置了read_only=True，那么就不需要进行数据验证，只会在返回时，将这个字段序列化后返回 
+</SPAN><BR><SPAN 
+style="font-size: 18px;">　　举个简单的例子：在用户进行购物的时候，用户post订单时，肯定会产生一个订单号，而这个订单号应该由后台逻辑完成，而不应该由用户post过来，如果不设置read_only=True，那么验证的时候就会报错。再例如，我们在网上购物时，支付时通常会产生支付状态，交易号，订单号，支付时间等字段，这些字段都应该设置为read_only=True，即这些字段都应该由后台产生然后返回给客户端；举例如下：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">    pay_status = serializers.CharField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    trade_no </SPAN>= serializers.CharField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    order_sn </SPAN>= serializers.CharField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    pay_time </SPAN>= serializers.DateTimeField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">    在用户提交订单的时候，我们在这里给用户新增一个字段，就是支付宝支付的URL
+    要设置为read_only</SPAN>=<SPAN style="color: rgb(0, 0, 0);">True，这样的话，就不能让用户端提交了，而是服务器端生成
+    返回给用户的
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>    alipay_url = serializers.SerializerMethodField(read_only=True)</SPAN></PRE></DIV>
+<P><STRONG><EM><SPAN 
+style="font-size: 18px;">write_only:与read_only对应;就是用户post过来的数据，后台服务器处理后不会再经过序列化后返回给客户端；最常见的就是我们在使用手机注册的验证码和填写的密码。</SPAN></EM></STRONG></P>
+<P><STRONG><EM><SPAN style="font-size: 18px;">required: 
+顾名思义，就是这个字段是否必填，例如要求：用户名，密码等是必须填写的；不填写就直接报错<BR>allow_null/allow_blank：是否允许为NULL/空 
+。 <BR>error_messages：出错时，信息提示。<BR>例如我们在定义用户注册序列化类时：</SPAN></EM></STRONG></P>
+<P>&nbsp;</P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"> code = serializers.CharField(required=True, write_only=True, label=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">验证码</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, max_length=<SPAN style="color: rgb(128, 0, 128);">6</SPAN>, min_length=<SPAN style="color: rgb(128, 0, 128);">6</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                 error_messages</SPAN>=<SPAN style="color: rgb(0, 0, 0);">{
+                                     </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">blank</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">请输入验证码</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                     </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">required</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">请输入验证码</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">, #当用户不输入时提示的错误信息
+                                     </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">max_length</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">验证码格式错误</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                     </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">min_length</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">验证码格式错误</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">
+                                 },
+                                 help_text</SPAN>=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">验证码</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">    验证用户名是否存在，allow_blank 不能为空；表示不允许用户名为空
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>    username = serializers.CharField(required=True, allow_blank=False, label=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户名</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                     validators</SPAN>=[UniqueValidator(queryset=User.objects.all(), message=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户已经存在</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)])
+    # 同理我们也应该将password设置write_only参数，不让它返回回去，这样容易被截获
+    password </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.CharField(
+        style</SPAN>={<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">input_type</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>: <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">password</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>}, help_text=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">密码</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, label=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">密码</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, write_only=True)</SPAN></PRE></DIV>
+<P>&nbsp;</P>
+<P><SPAN style="font-size: 18px;">label: 字段显示设置，如 label=’验证码’&nbsp;</SPAN></P>
+<P><SPAN style="font-size: 18px;">help_text: 在指定字段增加一些提示文字，这两个字段作用于api页面比较有用 
+<BR>style: 说明字段的类型，这样看可能比较抽象，看下面例子：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"># 在api页面，输入密码就会以*<SPAN style="color: rgb(0, 0, 0);">显示
+password </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.CharField(
+    style</SPAN>={<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">input_type</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>: <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">password</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">})
+# 会显示选项框
+color_channel </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.ChoiceField(
+    choices</SPAN>=[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">red</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>, <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">green</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>, <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">blue</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">],
+    style</SPAN>={<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">base_template</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>: <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">radio.html</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>})</SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">3. HiddenField</SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">HiddenField的值不依靠输入，而需要设置默认的值，不需要用户自己post数据过来，也不会显式返回给用户，最常用的就是user!! 
+</SPAN><BR><SPAN 
+style="font-size: 18px;">　　我们在登录情况下，进行一些操作，假设一个用户去收藏了某一门课，那么后台应该自动识别这个用户，然后用户只需要将课程的id 
+post过来，那么这样的功能，我们配合CurrentUserDefault()实现。</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># 这样就可以直接获取到当前用户
+user </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.HiddenField(
+    </SPAN><SPAN style="color: rgb(0, 0, 255);">default</SPAN>=serializers.CurrentUserDefault())</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">再例如，我们在收藏某件商品的时候，后台要获取到当前的用户；相当于前台只需要传递过来一个商品的ID即可；那么在后台我根据当前的登入用户和当前的商品ID即可判断用户是否收藏过该商品；这就是一个联合唯一主键的判断；这同样需要使用HiddenField。</SPAN></P>
+<P><SPAN style="font-size: 18px;">save instance</SPAN><BR><SPAN style="font-size: 18px;">　　这个标题是官方文档的一个小标题，我觉得用的很好，一眼看出，这是为post和patch所设置的，没错，这一部分功能是专门为这两种请求所设计的，如果只是简单的get请求，那么在设置了前面的field可能就能够满足这个需求。 
+</SPAN><BR><SPAN 
+style="font-size: 18px;">　　我们在view以及mixins的博客中提及到，post请求对应create方法，而patch请求对应update方法，这里提到的create方法与update方法，是指mixins中特定类中的方法。我们看一下源代码，源代码具体分析可以参考我的另外一篇博客：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># 只截取一部分
+</SPAN><SPAN style="color: rgb(0, 0, 255);">class</SPAN> CreateModelMixin(<SPAN style="color: rgb(0, 0, 255);">object</SPAN><SPAN style="color: rgb(0, 0, 0);">):
+    def create(self, request, </SPAN>*args, **<SPAN style="color: rgb(0, 0, 0);">kwargs):
+        serializer </SPAN>= self.get_serializer(data=<SPAN style="color: rgb(0, 0, 0);">request.data)
+        serializer.is_valid(raise_exception</SPAN>=<SPAN style="color: rgb(0, 0, 0);">True)
+        self.perform_create(serializer)
+        headers </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> self.get_success_headers(serializer.data)
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> Response(serializer.data, status=status.HTTP_201_CREATED, headers=<SPAN style="color: rgb(0, 0, 0);">headers)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+</SPAN><SPAN style="color: rgb(0, 0, 255);">class</SPAN> UpdateModelMixin(<SPAN style="color: rgb(0, 0, 255);">object</SPAN><SPAN style="color: rgb(0, 0, 0);">):
+    def update(self, request, </SPAN>*args, **<SPAN style="color: rgb(0, 0, 0);">kwargs):
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">partial</SPAN> = kwargs.pop(<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">partial</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">, False)
+        instance </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> self.get_object()
+        serializer </SPAN>= self.get_serializer(instance, data=request.data, <SPAN style="color: rgb(0, 0, 255);">partial</SPAN>=<SPAN style="color: rgb(0, 0, 255);">partial</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        serializer.is_valid(raise_exception</SPAN>=<SPAN style="color: rgb(0, 0, 0);">True)
+        self.perform_update(serializer)
+
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">if</SPAN> getattr(instance, <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">_prefetched_objects_cache</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">, None):
+            # If </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">prefetch_related</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);"> has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> {}
+
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN><SPAN style="color: rgb(0, 0, 0);"> Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()</SPAN></SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">可以看出，无论是create与update都写了一行：serializer.save( 
+)，那么，这一行，到底做了什么事情，分析一下源码。</SPAN></P>
+<P><SPAN style="font-size: 18px;">在serializer.py文件中：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">    def save(self, **<SPAN style="color: rgb(0, 0, 0);">kwargs):
+        assert not hasattr(self, </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">save_object</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">), (
+            </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">Serializer `%s.%s` has old-style version 2 `.save_object()` </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">that is no longer compatible with REST framework 3. </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">Use the new-style `.create()` and `.update()` methods instead.</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN> %<SPAN style="color: rgb(0, 0, 0);">
+            (self.__class__.__module__, self.__class__.__name__)
+        )
+
+        assert hasattr(self, </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">_errors</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">), (
+            </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">You must call `.is_valid()` before calling `.save()`.</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">
+        )
+
+        assert not self.errors, (
+            </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">You cannot call `.save()` on a serializer with invalid data.</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">
+        )
+
+        # Guard against incorrect use of `serializer.save(commit</SPAN>=<SPAN style="color: rgb(0, 0, 0);">False)`
+        assert </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">commit</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN> not <SPAN style="color: rgb(0, 0, 255);">in</SPAN><SPAN style="color: rgb(0, 0, 0);"> kwargs, (
+            </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">'commit' is not a valid keyword argument to the 'save()' method. </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">If you need to access data before committing to the database then </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">inspect 'serializer.validated_data' instead. </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">You can also pass additional keyword arguments to 'save()' if you </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">need to set extra attributes on the saved model instance. </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">For example: 'serializer.save(owner=request.user)'.'</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">
+        )
+
+        assert not hasattr(self, </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">_data</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">), (
+            </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">You cannot call `.save()` after accessing `serializer.data`.</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">If you need to access data before committing to the database then </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>
+            <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">inspect 'serializer.validated_data' instead. </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">
+        )
+
+        validated_data </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> dict(
+            list(self.validated_data.items()) </SPAN>+<SPAN style="color: rgb(0, 0, 0);">
+            list(kwargs.items())
+        )
+
+        </SPAN><SPAN style="color: rgb(255, 0, 0);">if self.instance is not None:
+            self.instance = self.update(self.instance, validated_data)
+            assert self.instance is not None, (
+                '`update()` did not return an object instance.'
+            )
+        else:
+            self.instance = self.create(validated_data)
+            assert self.instance is not None, (
+                '`create()` did not return an object instance.'
+            )
+
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> self.instance</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">显然，serializer.save的操作，它去调用了serializer的create或update方法，不是mixins中的！！！我们看一下流程图（以post为例）：</SPAN></P>
+<P><SPAN style="font-size: 18px;"><IMG alt="" src="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/1220824-20180325105912196-758874946.png"></SPAN></P>
+<P>&nbsp;</P>
+<P><SPAN style="font-size: 18px;"><SPAN 
+style="font-size: 18px;">讲了那么多，我们到底需要干什么！重载这两个方法！！&nbsp;</SPAN></SPAN></P>
+<P><EM id="__mceDel"><SPAN 
+style="font-size: 18px;">　　如果你的viewset含有post，那么你需要重载create方法，如果含有patch，那么就需要重载update方法。</SPAN></EM></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># 假设现在是个博客，有一个创建文章，与修改文章的功能, model为Article。
+</SPAN><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> ArticleSerializer(serializers.Serializer):
+    user </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.HiddenField(
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">default</SPAN>=<SPAN style="color: rgb(0, 0, 0);">serializers.CurrentUserDefault())
+    name </SPAN>= serializers.CharField(max_length=<SPAN style="color: rgb(128, 0, 128);">20</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+    content </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.CharField()
+
+    def create(self, validated_data):
+    # 除了用户，其他数据可以从validated_data这个字典中获取
+    # 注意，users在这里是放在上下文中的request，而不是直接的request
+        user </SPAN>= self.context[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">request</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">].user
+        name </SPAN>= validated_data[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">name </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">]
+        content </SPAN>= validated_data[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">content </SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">]
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> Article.objects.create(**<SPAN style="color: rgb(0, 0, 0);">validated_data)
+
+    def update(self, instance, validated_data):
+    # 更新的特别之处在于你已经获取到了这个对象instance
+        instance.name </SPAN>= validated_data.<SPAN style="color: rgb(0, 0, 255);">get</SPAN>(<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">name</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        instance.content </SPAN>= validated_data.<SPAN style="color: rgb(0, 0, 255);">get</SPAN>(<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">content</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        instance.save()
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> instance</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">可能会有人好奇，系统是怎么知道，我们需要调用serializer的create方法，还是update方法，我们从save( 
+)方法可以看出，判断的依据是：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">if</SPAN> self.instance <SPAN style="color: rgb(0, 0, 255);">is</SPAN> not None:pass</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">那么我们的mixins的create与update也已经在为开发者设置好了：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># CreateModelMixin
+serializer </SPAN>= self.get_serializer(data=<SPAN style="color: rgb(0, 0, 0);">request.data)
+# UpdateModelMixin
+serializer </SPAN>= self.get_serializer(instance, data=request.data, <SPAN style="color: rgb(0, 0, 255);">partial</SPAN>=<SPAN style="color: rgb(0, 0, 255);">partial</SPAN>)</SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">也就是说，在update通过get_object( 
+)的方法获取到了instance，然后传递给serializer，serializer再根据是否有传递instance来判断来调用哪个方法！</SPAN></P>
+<P><SPAN style="font-size: 18px;">Validation自定义验证逻辑</SPAN><BR><SPAN style="color: rgb(255, 0, 0); font-size: 18px;">单独的validate 
+(这个就类似于Django中Form中的局部钩子函数)</SPAN><BR><SPAN 
+style="font-size: 18px;">　　我们在上面提到field，它能起到一定的验证作用，但很明显，它存在很大的局限性，举个简单的例子，我们要判断我们手机号码，如果使用CharField(max_length=11, 
+min_length=11），它只能确保我们输入的是11个字符，那么我们需要自定义！</SPAN><SPAN 
+style="font-size: 18px;">就拿笔者在实际生产环境下的例子来说，光针对用户输入的手机号码，我们在后端就需要进行验证，例如该手机号码是否注册，手机号码是否合法(例如满足手机号码的zhengze表达式，以及要验证该手机号码向后台发送请求验证短信的频率等等)</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> SmsSerializer(serializers.Serializer):
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">    为什不用ModelSerializer来完成手机号码的验证呢？
+    因为VerifyCode中还有一个字段是手机验证码字段，直接使用ModelSerializer来验证会报错
+    因为ModelSerializer会自动生成VerifyCode模型中的所有字段；但是
+    我们传递过来的就是一个手机号，判断它是否是合法的
+    因此使用Serializer来自定义合法性校验规则，相当于就是钩子函数
+    单独对手机号码进行验证
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>    mobile = serializers.CharField(max_length=<SPAN style="color: rgb(128, 0, 128);">11</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+　　<SPAN style="color: rgb(255, 0, 0);"># 使用validate_字段名(self, 字段名)：要么返回字段，要么抛出异常</SPAN>
+    def validate_mobile(self, mobile):
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">        验证手机号码，记住这里的validate_字段名一定要是数据模型中的字段
+        :param attrs:
+        :</SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN><SPAN style="color: rgb(0, 0, 0);">:
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">        # 手机号码是否注册，查询UserProfile表即可
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">if</SPAN> User.objects.filter(mobile=<SPAN style="color: rgb(0, 0, 0);">mobile).exists():
+            raise serializers.ValidationError(</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户已经存在</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+
+        # 验证手机号码是否合法，这部分应该是在前端做的，当然后台也需要进行验证
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">if</SPAN><SPAN style="color: rgb(0, 0, 0);"> not re.match(REGEX_MOBILE, mobile):
+            raise serializers.ValidationError(</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">手机号码格式不正确</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+
+        # 验证发送频率，如果不做，用户可以一直向后台发送，请求验证码；
+        # 会造成很大的压力，限制一分钟只能发送一次 </SPAN><SPAN style="color: rgb(128, 0, 128);">7</SPAN>-<SPAN style="color: rgb(128, 0, 128);">8</SPAN> <SPAN style="color: rgb(128, 0, 128);">09</SPAN>:<SPAN style="color: rgb(128, 0, 128);">00</SPAN><SPAN style="color: rgb(0, 0, 0);">
+        one_minute_ago </SPAN>= datetime.now() - timedelta(hours=<SPAN style="color: rgb(128, 0, 128);">0</SPAN>, minutes=<SPAN style="color: rgb(128, 0, 128);">1</SPAN>, seconds=<SPAN style="color: rgb(128, 0, 128);">0</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">        如果添加时间在一分钟以内，它肯定是大于你一分钟之前的时间的
+        如果这条记录存在
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>        <SPAN style="color: rgb(0, 0, 255);">if</SPAN> VerifyCode.objects.filter(add_time__gt=one_minute_ago, mobile=<SPAN style="color: rgb(0, 0, 0);">mobile):
+            raise serializers.ValidationError(</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">抱歉，一分钟只能发送一次</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        # 如果验证通过，我就将这个mobile返回去，这里一定要有一个返回
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> mobile</SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">联合validate 这个就类似于全局钩子函数</SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">　　上面验证方式，只能验证一个字段，如果是两个字段联合在一起进行验证，那么我们就可以重载validate( 
+)方法。</SPAN></P>
+<P>&nbsp;</P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">　　 start =<SPAN style="color: rgb(0, 0, 0);"> serializers.DateTimeField()
+    finish </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.DateTimeField()
+
+    def validate(self, attrs):
+    # 传进来什么参数，就返回什么参数，一般情况下用attrs
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">if</SPAN> data[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">start</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>] &gt; data[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">finish</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">]:
+            raise serializers.ValidationError(</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">finish must occur after start</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> attrs</SPAN></PRE></DIV>
+<P>&nbsp;</P>
+<P><SPAN style="font-size: 18px;"><SPAN 
+style="color: rgb(255, 0, 0);">这个方法非常的有用，我们还可以再这里对一些read_only的字段进行操作，我们在read_only提及到一个例子，订单号的生成，我们可以在这步生成一个订单号，然后添加到attrs这个字典中</SPAN>。看如下的代码：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> OrderSerializer(serializers.ModelSerializer):
+    user </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.HiddenField(
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">default</SPAN>=<SPAN style="color: rgb(0, 0, 0);">serializers.CurrentUserDefault()
+    )
+
+    pay_status </SPAN>= serializers.CharField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    trade_no </SPAN>= serializers.CharField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    order_sn </SPAN>= serializers.CharField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    pay_time </SPAN>= serializers.DateTimeField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">    在用户提交订单的时候，我们在这里给用户新增一个字段，就是支付宝支付的URL
+    要设置为read_only</SPAN>=<SPAN style="color: rgb(0, 0, 0);">True，这样的话，就不能让用户端提交了，而是服务器端生成
+    返回给用户的
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>    alipay_url = serializers.SerializerMethodField(read_only=<SPAN style="color: rgb(0, 0, 0);">True)
+
+    def get_alipay_url(self, obj):  # obj就是OrderSerializer对象
+        alipay </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> AliPay(
+            appid</SPAN>=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">2016091200490227</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,  # 沙箱环境中可以找到
+            app_notify_url</SPAN>=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">http://47.92.87.172:8000/alipay/return/</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+            app_private_key_path</SPAN>=<SPAN style="color: rgb(0, 0, 0);">private_key_path,  # 个人私钥
+            alipay_public_key_path</SPAN>=<SPAN style="color: rgb(0, 0, 0);">ali_pub_key_path,  # 支付宝的公钥，验证支付宝回传消息使用，不是你自己的公钥,
+            debug</SPAN>=<SPAN style="color: rgb(0, 0, 0);">True,  # 默认False,上线的时候修改为False即可
+            return_url</SPAN>=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">http://47.92.87.172:8000/alipay/return/</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">
+        )
+
+        url </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> alipay.direct_pay(
+            # 一个订单里面可能有多个商品，因此subject
+            # 不适合使用商品名称
+            subject</SPAN>=<SPAN style="color: rgb(0, 0, 0);">obj.order_sn,
+            out_trade_no</SPAN>=<SPAN style="color: rgb(0, 0, 0);">obj.order_sn,
+            total_amount</SPAN>=<SPAN style="color: rgb(0, 0, 0);">obj.order_mount,
+        )
+        re_url </SPAN>= <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">https://openapi.alipaydev.com/gateway.do?{data}</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>.format(data=<SPAN style="color: rgb(0, 0, 0);">url)
+
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN><SPAN style="color: rgb(0, 0, 0);"> re_url
+
+    def generate_order_sn(self):
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">        后台系统生成订单号
+        这个是系统后台生成的：
+        当前时间</SPAN>+userId+<SPAN style="color: rgb(0, 0, 0);">随机数
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>        random_ins =<SPAN style="color: rgb(0, 0, 0);"> Random()
+        order_sn </SPAN>= <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">{time_str}{user_id}{random_num}</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>.format(time_str=time.strftime(<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">%Y%m%d%H%M%S</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">),
+                                                            user_id</SPAN>=self.context[<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">request</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">].user.id,
+                                                            random_num</SPAN>=random_ins.randint(<SPAN style="color: rgb(128, 0, 128);">1000</SPAN>, <SPAN style="color: rgb(128, 0, 128);">9999</SPAN><SPAN style="color: rgb(0, 0, 0);">))
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN><SPAN style="color: rgb(0, 0, 0);"> order_sn
+
+    <SPAN style="color: rgb(255, 0, 0);">def validate(self, attrs):  # 全局钩子函数
+        attrs[</SPAN></SPAN><SPAN style="color: rgb(255, 0, 0);">"order_sn"] = self.generate_order_sn()
+        return attrs
+
+    </SPAN><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> Meta:
+        model </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> OrderInfo
+        fields </SPAN>= <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">__all__</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN></SPAN></PRE></DIV>
+<P><SPAN 
+style="color: rgb(255, 0, 0); font-size: 18px;">这个方法运用在modelserializer中，可以剔除掉write_only的字段，这个字段只验证，但不存在于指定的model当中，即不能save( 
+)，可以在这delete掉；例如短信验证码验证完毕后就可以删除了：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);">    def validate(self, attrs):
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">        判断完毕后删除验证码，因为没有什么用了
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>        attrs[<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">mobile</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>] = attrs[<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">username</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">]
+        del attrs[</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">code</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">]
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> attrs</SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">Validators</SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">validators可以直接作用于某个字段，这个时候，它与单独的validate作用差不多；当然，drf提供的validators还有很好的功能：UniqueValidator，UniqueTogetherValidator等；UniqueValidator: 
+指定某一个对象是唯一的，如，用户名只能存在唯一：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">    username = serializers.CharField(required=True, allow_blank=False, label=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户名</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, max_length=<SPAN style="color: rgb(128, 0, 128);">16</SPAN>, min_length=<SPAN style="color: rgb(128, 0, 128);">6</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                     validators</SPAN>=[UniqueValidator(queryset=User.objects.all(), message=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户已经存在</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)],
+                                     error_messages</SPAN>=<SPAN style="color: rgb(0, 0, 0);">{
+                                         </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">blank</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户名不允许为空</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                         </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">required</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">请输入用户名</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                         </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">max_length</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户名长度最长为16位</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                                         </SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">min_length</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>: <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">用户名长度至少为6位</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">
+                                     })</SPAN></SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">UniqueTogetherValidator: 
+联合唯一，例如我们需要判断用户是否收藏了某个商品，前端只需要传递过来一个商品ID即可。这个时候就不是像上面那样单独作用于某个字段，而是需要进行联合唯一的判断，即用户ID和商品ID；此时我们需要在Meta中设置。</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> UserFavSerializer(serializers.ModelSerializer):
+    # 获取到当前用户
+    user </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.HiddenField(
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">default</SPAN>=<SPAN style="color: rgb(0, 0, 0);">serializers.CurrentUserDefault()
+    )
+
+    </SPAN><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> Meta:
+        model </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> UserFav
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">        我们需要获取的是当前登入的user
+        以后要取消收藏，只需要获取这里的id即可
+        UniqueTogetherValidator作用在多个字段之上
+        因为是联合唯一主键
+        </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>        validators =<SPAN style="color: rgb(0, 0, 0);"> [
+            UniqueTogetherValidator(
+                queryset</SPAN>=<SPAN style="color: rgb(0, 0, 0);">UserFav.objects.all(),
+                fields</SPAN>=(<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">user</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>, <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">goods</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">),
+                message</SPAN>=<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">已经收藏</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">
+            )
+        ]
+        fields </SPAN>= (<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">user</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">goods</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">id</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>)</SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">ModelSerializer</SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">　　讲了很多Serializer的，在这个时候，我还是强烈建议使用ModelSerializer，因为在大多数情况下，我们都是基于model字段去开发。</SPAN></P>
+<H4 id="好处"><SPAN style="font-size: 18px;"><A name="t11" 
+target="_blank"></A>好处：</SPAN></H4>
+<P><SPAN 
+style="font-size: 18px;">　　ModelSerializer已经重载了create与update方法，它能够满足将post或patch上来的数据进行进行直接地创建与更新，除非有额外需求，那么就可以重载create与update方法。&nbsp;</SPAN><BR><SPAN 
+style="font-size: 18px;">　　ModelSerializer在Meta中设置fields字段，系统会自动进行映射，省去每个字段再写一个field。</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> UserDetailSerializer(serializers.ModelSerializer):
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN><SPAN style="color: rgb(0, 0, 0);">    用户详情序列化
+    </SPAN><SPAN style="color: rgb(128, 0, 0);">"""
+</SPAN>
+    <SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> Meta:
+        model </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> User
+        fields </SPAN>= (<SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">name</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">gender</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">birthday</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">email</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN>, <SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">mobile</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">)
+        # fields </SPAN>= <SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">__all__</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">: 表示所有字段
+        # exclude </SPAN>= (<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">add_time</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">,):  除去指定的某些字段
+        # 这三种方式，存在一个即可</SPAN></SPAN></PRE></DIV>
+<P><SPAN style="font-size: 18px;">ModelSerializer需要解决的2个问题：</SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">　　1，某个字段不属于指定model，它是write_only，需要用户传进来，但我们不能对它进行save( 
+)，因为ModelSerializer是基于Model，这个字段在Model中没有对应，这个时候，我们需要重载validate！&nbsp;</SPAN><BR><SPAN 
+style="font-size: 18px;">如在用户注册时，我们需要填写验证码，这个验证码只需要验证，不需要保存到用户这个Model中：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"> def validate(self, attrs):
+        del attrs[</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(128, 0, 0);">code</SPAN><SPAN style="color: rgb(128, 0, 0);">"</SPAN><SPAN style="color: rgb(0, 0, 0);">]
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> attrs</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">　　2，某个字段不属于指定model，它是read_only，只需要将它序列化传递给用户，但是在这个model中，没有这个字段！我们需要用到SerializerMethodField。&nbsp;<BR>　　假设需要返回用户加入这个网站多久了，不可能维持这样加入的天数这样一个数据，一般会记录用户加入的时间点，然后当用户获取这个数据，我们再计算返回给它。</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> UserSerializer(serializers.ModelSerializer):  
+    days_since_joined </SPAN>=<SPAN style="color: rgb(0, 0, 0);"> serializers.SerializerMethodField()
+    # 方法写法：get_ </SPAN>+<SPAN style="color: rgb(0, 0, 0);"> 字段
+    def get_days_since_joined(self, obj):
+    # obj指这个model的对象
+        </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> (now() -<SPAN style="color: rgb(0, 0, 0);"> obj.date_joined).days
+
+    </SPAN><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> Meta:
+        model </SPAN>= User</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">当然，这个的SerializerMethodField用法还相对简单一点，后面还会有比较复杂的情况。</SPAN></P>
+<H3 id="关于外键的serializers">关于外键的serializers</H3>
+<P><SPAN style="font-size: 18px;">　　讲了那么多，终于要研究一下外键啦~&nbsp;</SPAN><BR><SPAN 
+style="font-size: 18px;">　　其实，外键的field也比较简单，如果我们直接使用serializers.Serializer，那么直接用PrimaryKeyRelatedField就解决了。&nbsp;</SPAN><BR><SPAN 
+style="font-size: 18px;">　　假设现在有一门课python入门教学(course)，它的类别是python(catogory)。</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># 指定queryset
+category </SPAN>= serializers.PrimaryKeyRelatedField(queryset=CourseCategory.objects.all(), required=True)</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">ModelSerializer就更简单了，直接通过映射就好了&nbsp;<BR>不过这样只是用户获得的只是一个外键类别的id，并不能获取到详细的信息，如果想要获取到具体信息，那需要嵌套serializer：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">category = CourseCategorySerializer()</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">注意：上面两种方式，外键都是正向取得，下面介绍怎么反向去取，如，我们需要获取python这个类别下，有什么课程。&nbsp;</SPAN><BR><SPAN 
+style="font-size: 18px;">　　首先，在课程course的model中，需要在外键中设置related_name：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 255);">class</SPAN><SPAN style="color: rgb(0, 0, 0);"> Course(model.Model):
+    category </SPAN>= models.ForeignKey(CourseCategory, related_name=<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">courses</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>)</SPAN></PRE></DIV>
+<P>&nbsp;</P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;"><SPAN style="color: rgb(0, 0, 0);"># 反向取课程，通过related_name
+# 一对多，一个类别下有多个课程，一定要设定many</SPAN>=<SPAN style="color: rgb(0, 0, 0);">True
+courses </SPAN>= CourseSerializer(many=True)</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">写到这里，我们的外键就基本讲完了！还有一个小问题：我们在上面提到ModelSerializer需要解决的第二个问题中，其实还有一种情况，就是某个字段属于指定model，但不能获取到相关数据。&nbsp;</SPAN><BR><SPAN 
+style="font-size: 18px;">　　假设现在是一个多级分类的课程，例如，编程语言–&gt;python–&gt;python入门学习课程，编程语言与python属于类别，另外一个属于课程，编程语言类别是python类别的一个外键，而且属于同一个model，实现方法：</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">parent_category = models.ForeignKey(<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">self</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>, <SPAN style="color: rgb(0, 0, 255);">null</SPAN>=True, blank=<SPAN style="color: rgb(0, 0, 0);">True, 
+                    verbose_name</SPAN>=<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">父类目别</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">,
+                    related_name</SPAN>=<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">sub_cat</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>)</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">现在获取编程语言下的课程，显然无法直接获取到python入门学习这个课程，因为它们两没有外键关系。SerializerMethodField( 
+)也可以解决这个问题，只要在自定义的方法中实现相关的逻辑即可！</SPAN></P>
+<DIV class="cnblogs_code">
+<PRE><SPAN style="font-size: 18px;">courses =<SPAN style="color: rgb(0, 0, 0);"> SerializerMethodField()
+def get_courses(self, obj):
+    all_courses </SPAN>= Course.objects.filter(category__parent_category_id=<SPAN style="color: rgb(0, 0, 0);">obj.id)
+    courses_serializer </SPAN>= CourseSerializer(all_course, many=<SPAN style="color: rgb(0, 0, 0);">True, 
+                    context</SPAN>={<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">request</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN>: self.context[<SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(128, 0, 0);">request</SPAN><SPAN style="color: rgb(128, 0, 0);">'</SPAN><SPAN style="color: rgb(0, 0, 0);">]})
+    </SPAN><SPAN style="color: rgb(0, 0, 255);">return</SPAN> courses_serializer.data</SPAN></PRE></DIV>
+<P><SPAN 
+style="font-size: 18px;">上面的例子看起来有点奇怪，因为我们在SerializerMethodField()嵌套了serializer，就需要自己进行序列化，然后再从data就可以取出json数据。&nbsp;<BR>　　可以看到传递的参数是分别是：queryset，many=True多个对象，context上下文。这个context十分关键，如果不将request传递给它，在序列化的时候，图片与文件这些Field不会再前面加上域名，也就是说，只会有/media/img…这样的路径！</SPAN></P>
+<P><SPAN 
+style="font-size: 18px;">　　以上就是关于DRF的Serializer的小结，如果有错漏，烦请指正，后面我将把自己工作中遇到的坑分享出来，希望对大家有帮助！</SPAN></P></DIV>
+<DIV id="MySignature"></DIV>
+<DIV class="clear"></DIV>
+<DIV id="blog_post_info_block">
+<DIV id="BlogPostCategory"></DIV>
+<DIV id="EntryTag"></DIV>
+<DIV id="blog_post_info"></DIV>
+<DIV class="clear"></DIV>
+<DIV id="post_next_prev"></DIV></DIV></DIV>
+<DIV class="postDesc">posted @ <SPAN id="post-date">2018-03-20 10:38</SPAN> <A 
+href="https://www.cnblogs.com/pyspark/">哀乐之巅写年华</A> 阅读(<SPAN id="post_view_count">...</SPAN>) 
+评论(<SPAN id="post_comment_count">...</SPAN>)  <A href="https://i.cnblogs.com/EditPosts.aspx?postid=8607801" 
+rel="nofollow">编辑</A> <A onclick="AddToWz(8607801);return false;" href="https://www.cnblogs.com/pyspark/p/8607801.html#">收藏</A></DIV></DIV>
+<SCRIPT type="text/javascript">var allowComments=true,cb_blogId=374333,cb_entryId=8607801,cb_blogApp=currentBlogApp,cb_blogUserGuid='27de9c24-c507-4671-7b44-08d49c352df3',cb_entryCreatedDate='2018/3/20 10:38:00';loadViewCount(cb_entryId);var cb_postType=1;var isMarkdown=false;</SCRIPT>
+	 </DIV><!--end: topics 文章、评论容器--> </DIV><A name="!comments"></A>
+<DIV id="blog-comments-placeholder"></DIV>
+<SCRIPT type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</SCRIPT>
+ 
+<DIV class="commentform" id="comment_form"><A name="commentform"></A> 
+<DIV id="divCommentShow"></DIV>
+<DIV id="comment_nav"><SPAN id="span_refresh_tips"></SPAN><A id="lnk_RefreshComments" 
+onclick="return RefreshCommentList();" href="javascript:void(0);" clientidmode="Static" 
+runat="server">刷新评论</A><A onclick="return RefreshPage();" href="https://www.cnblogs.com/pyspark/p/8607801.html#">刷新页面</A><A 
+href="https://www.cnblogs.com/pyspark/p/8607801.html#top">返回顶部</A></DIV>
+<DIV id="comment_form_container"></DIV>
+<DIV class="ad_text_commentbox" id="ad_text_under_commentbox"></DIV>
+<DIV id="ad_t2"></DIV>
+<DIV id="opt_under_post"></DIV>
+<SCRIPT src="Django%20rest%20framework之序列化小结%20-%20哀乐之巅写年华%20-%20博客园_files/gpt.js" async="async"></SCRIPT>
+ 
+<SCRIPT>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+</SCRIPT>
+ 
+<SCRIPT>
+  googletag.cmd.push(function() {
+        googletag.defineSlot('/1090369/C1', [300, 250], 'div-gpt-ad-1546353474406-0').addService(googletag.pubads());
+        googletag.defineSlot('/1090369/C2', [468, 60], 'div-gpt-ad-1539008685004-0').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+  });
+</SCRIPT>
+ 
+<DIV class="c_ad_block" id="cnblogs_c1">
+<DIV id="div-gpt-ad-1546353474406-0" 
+style="width: 300px; height: 250px;"></DIV></DIV>
+<DIV id="under_post_news"></DIV>
+<DIV class="c_ad_block" id="cnblogs_c2">
+<DIV id="div-gpt-ad-1539008685004-0" 
+style="width: 468px; height: 60px;"></DIV></DIV>
+<DIV id="under_post_kb"></DIV>
+<DIV class="c_ad_block" id="HistoryToday"></DIV>
+<SCRIPT type="text/javascript">
+ if(enablePostBottom()) {
+    codeHighlight();
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverT2();
+    deliverC1();
+    deliverC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);  
+}
+</SCRIPT>
+ </DIV></DIV><!--end: forFlow -->	 </DIV><!--end: mainContent 主体内容容器-->	 
+<DIV id="sideBar">
+<DIV id="sideBarMain">
+<DIV id="calendar">
+<DIV id="blog-calendar" style="display: none;"></DIV>
+<SCRIPT type="text/javascript">loadBlogDefaultCalendar();</SCRIPT>
+</DIV><!--done--> 
+<DIV class="newsItem">
+<H3 class="catListTitle">公告</H3>
+<DIV id="blog-news"></DIV>
+<SCRIPT type="text/javascript">loadBlogNews();</SCRIPT>
+ </DIV>
+<DIV id="leftcontentcontainer">
+<DIV id="blog-sidecolumn"></DIV>
+<SCRIPT type="text/javascript">loadBlogSideColumn();</SCRIPT>
+			 </DIV></DIV><!--end: sideBarMain -->	 </DIV><!--end: sideBar 侧边栏容器 -->	 
+<DIV class="clear"></DIV></DIV><!--end: main -->	 
+<DIV class="clear"></DIV>
+<DIV id="footer"><!--done--> Copyright ©2019 哀乐之巅写年华	 </DIV><!--end: footer --> 
+</DIV><!--end: home 自定义的最大容器 --> </BODY></HTML>
