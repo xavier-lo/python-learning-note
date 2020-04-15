@@ -1,0 +1,7 @@
+1.mkdir LHPrj 新建工程目录
+2.cd LHPrj 切换进目录
+3.conda env list 显示conda虚拟环境列表
+4.(Linux)source activate env_name 激活虚拟环境
+5.django-admin startproject LHPrj 新建一个django项目
+6.cd LHPrj
+7.python manage.py startapp Prj01 新建一个app
