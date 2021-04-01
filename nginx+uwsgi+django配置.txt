@@ -29,7 +29,7 @@ server {
 
 
 	location /static {#添加静态资源
-		autoindex on;
+		autoindex on;#添加此处可通过浏览器输入ip地址/static 显示静态资源 调试用 正常禁用此项
 		alias  /static/; #此处由于 在项目setting.py文件中添加：STATIC_ROOT = '/static/' 再通过在django目录下（虚拟环境内）执行过 python manage.py collectstatic 将静态文件复制到/static目录下了 如果不执行上述命令此处可直接添加静态文件绝对路径
 	}
 }
