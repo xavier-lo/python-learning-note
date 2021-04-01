@@ -1,0 +1,105 @@
+1.环境：
+    运行系统：
+        测试环境：windows8.1-x64 nginx:1.18.0
+        服务器环境：ubuntu18.04-x64 nginx:1.14.0  uwsgi:2.0.19.1(conda内)
+    		conda: 4.9.2
+    		python：3.8
+    		django：2.2
+2.安装：
+
+3.配置：
+      a.nginx配置：
+	cd /etc/nginx/sites-available/default
+	ls -s default ../sites-enabled/default
+	cd /etc/nginx/sites-enabled	
+	vim default
+文件内添加如下
+upstream django {
+       server 127.0.0.1:8000;  # 此处为uwsgi监听地址和端口 可添加多个对象
+   }
+
+server {
+	listen 11800; #此处nginx监听端口
+
+	location / { #添加根目录
+		uwsgi_pass django;#添加uwsgi监听地址和端口
+		uwsgi_read_timeout 2;
+		include uwsgi_params;
+	}
+
+
+	location /static {#添加静态资源
+		autoindex on;
+		alias  /static/; #此处由于 在项目setting.py文件中添加：STATIC_ROOT = '/static/' 再通过在django目录下（虚拟环境内）执行过 python manage.py collectstatic 将静态文件复制到/static目录下了 如果不执行上述命令此处可直接添加静态文件绝对路径
+	}
+}
+	
+
+
+      b.uwsgi配置：
+	cd django工程配置目录下（与setting.py同级）
+	vim wsgi.py
+文件内容为：
+import os
+
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django工程名.settings')
+
+application = get_wsgi_application()
+    
+        cd django工程目录下(与manage.py同级)
+        touch uwsgi.ini
+	vim uwsgi.ini
+文件内容：
+[uwsgi]
+;直接做web服务器时所 监听地址和端口 单独使用uwsgi来部署Django项目时，就用这一行
+;http = 127.0.0.1:8000
+
+; 使用nginx连接时 进行套接字通信的方式：端口或文件  使用nginx+uwsgi来部署Django项目时，就用这行
+ socket = 127.0.0.1:8000
+; socket = /home/kzzf/project/OfferHelp/OfferHelp.sock
+
+; 项目所在目录，和manage.py同级
+chdir = /home/nowhay/mydev/websit/nAPI
+
+; 虚拟环境所在目录
+home=/root/anaconda3/envs/py38dj22
+PYTHONHOME =/root/anaconda3/envs/py38dj22/bin/
+
+; 主应用中的wsgi文件
+wsgi-file = nAPI/wsgi.py
+
+; 使用路由代理静态资源，但失败了
+ static-safe=/home/nowhay/mydev/websit/nAPI/static
+ route = /static/(.*) static:/home/nowhay/mydev/websit/nAPI/static/$1
+
+; 代理静态资源：路径映射
+ static-map = /static=/home/nowhay/mydev/websit/nAPI/static
+
+; 启动一个master进程，来管理其余的子进程
+master=True
+processes = 1
+threads = 1
+
+; 保存主进程的pid，用来控制uwsgi服务
+pidfile=/home/nowhay/mydev/websit/nAPI/uwsgi.pid
+; 启动项目  uwsgi uwsgi.ini
+; uwsgi --stop/reload xxx.pid  停止/重启uwsgi
+
+; 设置后台运行，保存日志
+daemonize=/home/nowhay/mydev/websit/nAPI/uwsgi.log
+; deamonize=1  ; 用来配置background运行
+
+; 设置每个工作进程处理请求的上限，达到上限时，将回收（重启）该进程。可以预防内存泄漏
+max-requests=5000
+
+# 服务停止时自动移除unix Socket和pid文件
+vacuum=true
+
+3.启动：
+	sudo nginx -s reload
+	sudo service nginx restart
+	cd django工程目录下(与manage.py同级)
+	uwsgi --ini uwsgi.ini
+
